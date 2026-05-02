@@ -1,0 +1,246 @@
+[
+  {
+    "id": "calabresa",
+    "name": "Calabresa",
+    "cat": "tradicionais",
+    "sizes": {
+      "P": 25,
+      "M": 40,
+      "G": 50
+    },
+    "img": "assets/img/pizza-calabresa.jpg",
+    "desc": "Molho, mussarela, calabresa e cebola.",
+    "active": true
+  },
+  {
+    "id": "mussarela",
+    "name": "Mussarela",
+    "cat": "tradicionais",
+    "sizes": {
+      "P": 25,
+      "M": 40,
+      "G": 50
+    },
+    "img": "assets/img/pizza-mussarela.jpg",
+    "desc": "Molho, mussarela e orégano.",
+    "active": true
+  },
+  {
+    "id": "vegetariana",
+    "name": "Vegetariana",
+    "cat": "tradicionais",
+    "sizes": {
+      "P": 25,
+      "M": 40,
+      "G": 50
+    },
+    "img": "assets/img/pizza-presunto.jpg",
+    "desc": "Molho, mussarela, milho verde, ervilha, tomate e cebola.",
+    "active": true
+  },
+  {
+    "id": "brasileira",
+    "name": "Brasileira",
+    "cat": "tradicionais",
+    "sizes": {
+      "P": 25,
+      "M": 40,
+      "G": 50
+    },
+    "img": "assets/img/pizza-calabresa.jpg",
+    "desc": "Molho, calabresa, tomate e cebola a gosto.",
+    "active": true
+  },
+  {
+    "id": "romana",
+    "name": "Romana",
+    "cat": "tradicionais",
+    "sizes": {
+      "P": 25,
+      "M": 40,
+      "G": 50
+    },
+    "img": "assets/img/pizza-presunto.jpg",
+    "desc": "Molho, mussarela, presunto, tomate e cebola a gosto.",
+    "active": true
+  },
+  {
+    "id": "amor-perfeito",
+    "name": "Amor Perfeito",
+    "cat": "tradicionais",
+    "sizes": {
+      "P": 25,
+      "M": 40,
+      "G": 50
+    },
+    "img": "assets/img/pizza-presunto.jpg",
+    "desc": "Molho, mussarela, presunto, catupiry e orégano.",
+    "active": true
+  },
+  {
+    "id": "frango-mussarela",
+    "name": "Frango com mussarela",
+    "cat": "tradicionais",
+    "sizes": {
+      "P": 25,
+      "M": 40,
+      "G": 50
+    },
+    "img": "assets/img/pizza-frango-catupiry.jpg",
+    "desc": "Molho, mussarela, frango desfiado e orégano.",
+    "active": true
+  },
+  {
+    "id": "verona",
+    "name": "Verona",
+    "cat": "tradicionais",
+    "sizes": {
+      "P": 25,
+      "M": 40,
+      "G": 50
+    },
+    "img": "assets/img/pizza-calabresa.jpg",
+    "desc": "Molho, calabresa, catupiry e orégano.",
+    "active": true
+  },
+  {
+    "id": "baiana",
+    "name": "Baiana",
+    "cat": "tradicionais",
+    "sizes": {
+      "P": 25,
+      "M": 40,
+      "G": 50
+    },
+    "img": "assets/img/pizza-calabresa.jpg",
+    "desc": "Molho, mussarela, calabresa moída, pimenta e orégano.",
+    "active": true
+  },
+  {
+    "id": "napolitana",
+    "name": "Napolitana",
+    "cat": "tradicionais",
+    "sizes": {
+      "P": 25,
+      "M": 40,
+      "G": 50
+    },
+    "img": "assets/img/pizza-presunto.jpg",
+    "desc": "Molho, mussarela, rodelas de tomate e orégano.",
+    "active": true
+  },
+  {
+    "id": "grega",
+    "name": "Grega",
+    "cat": "tradicionais",
+    "sizes": {
+      "P": 25,
+      "M": 40,
+      "G": 50
+    },
+    "img": "assets/img/pizza-presunto.jpg",
+    "desc": "Molho, calabresa, presunto, milho, ervilha, orégano e cebola a gosto.",
+    "active": true
+  },
+  {
+    "id": "caipira",
+    "name": "Caipira",
+    "cat": "tradicionais",
+    "sizes": {
+      "P": 25,
+      "M": 40,
+      "G": 50
+    },
+    "img": "assets/img/pizza-frango-catupiry.jpg",
+    "desc": "Molho, mussarela, frango desfiado, milho, catupiry e orégano.",
+    "active": true
+  },
+  {
+    "id": "frango-catupiry",
+    "name": "Frango com catupiry",
+    "cat": "tradicionais",
+    "sizes": {
+      "P": 25,
+      "M": 40,
+      "G": 50
+    },
+    "img": "assets/img/pizza-frango-catupiry.jpg",
+    "desc": "Molho, mussarela, frango desfiado, catupiry, orégano, milho e ervilha.",
+    "active": true
+  },
+  {
+    "id": "nobre",
+    "name": "Nobre",
+    "cat": "tradicionais",
+    "sizes": {
+      "P": 25,
+      "M": 40,
+      "G": 50
+    },
+    "img": "assets/img/pizza-presunto.jpg",
+    "desc": "Molho, mussarela, presunto e orégano.",
+    "active": true
+  },
+  {
+    "id": "camarao",
+    "name": "Camarão",
+    "cat": "tradicionais",
+    "sizes": {
+      "P": 25,
+      "M": 40,
+      "G": 50
+    },
+    "img": "assets/img/pizza-camarao.jpg",
+    "desc": "Molho, mussarela, camarão e orégano.",
+    "active": true
+  },
+  {
+    "id": "quatro-queijos",
+    "name": "4 queijos",
+    "cat": "tradicionais",
+    "sizes": {
+      "P": 25,
+      "M": 40,
+      "G": 50
+    },
+    "img": "assets/img/pizza-quatro-queijos.jpg",
+    "desc": "Molho, mussarela, catupiry, cheddar e queijo coalho.",
+    "active": true
+  },
+  {
+    "id": "coca-lata",
+    "name": "Coca-Cola lata 350ml",
+    "cat": "bebidas",
+    "price": 6,
+    "img": "assets/img/refrigerante.jpg",
+    "desc": "Refrigerante lata 350ml.",
+    "active": true
+  },
+  {
+    "id": "guarana-lata",
+    "name": "Guaraná lata 350ml",
+    "cat": "bebidas",
+    "price": 6,
+    "img": "assets/img/refrigerante.jpg",
+    "desc": "Refrigerante lata 350ml.",
+    "active": true
+  },
+  {
+    "id": "fanta-lata",
+    "name": "Fanta laranja lata 350ml",
+    "cat": "bebidas",
+    "price": 6,
+    "img": "assets/img/refrigerante.jpg",
+    "desc": "Refrigerante lata 350ml.",
+    "active": true
+  },
+  {
+    "id": "agua",
+    "name": "Água sem gás",
+    "cat": "bebidas",
+    "price": 4,
+    "img": "assets/img/suco.jpg",
+    "desc": "Água sem gás gelada.",
+    "active": true
+  }
+]

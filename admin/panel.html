@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <script src="auth.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Controle - Pizzaria Tres Coracoes</title>
+  <link rel="manifest" href="manifest.json">
+  <style>
+    :root {
+      --primary-color: #1A3C26;
+      --primary-hover: #2E5239;
+      --danger-color: #c82333;
+      --light-gray: #f4f4f5;
+      --gray: #e2e2e2;
+      --dark-gray: #555;
+      --card-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--light-gray);
+      margin: 0;
+      padding: 0;
+    }
+    .header {
+      background-color: white;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--card-shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .header h1 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: var(--primary-color);
+    }
+    .header .actions button {
+      margin-left: 1rem;
+    }
+    .btn {
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 1rem;
+      font-weight: bold;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+    .main-container {
+      padding: 2rem;
+    }
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .menu-card {
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: var(--card-shadow);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .menu-card img {
+      width: 100%;
+      height: 180px;
+      object-fit: cover;
+    }
+    .menu-card-content {
+      padding: 1rem;
+    }
+    .menu-card-content h3 {
+      margin: 0 0 0.5rem;
+    }
+    .menu-card-content p {
+      margin: 0 0 1rem;
+      color: var(--dark-gray);
+    }
+    .menu-card-actions {
+      margin-top: auto;
+      padding: 1rem;
+      border-top: 1px solid var(--gray);
+      display: flex;
+      gap: 0.5rem;
+    }
+    #loading {
+      text-align: center;
+      padding: 4rem;
+      font-size: 1.2rem;
+      color: var(--dark-gray);
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.5);
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: auto;
+      padding: 30px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+      position: relative;
+    }
+    .close-btn {
+      color: #aaa;
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: 600;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 0.75rem;
+      border: 1px solid var(--gray);
+      border-radius: 4px;
+      box-sizing: border-box;
+    }
+    .form-group textarea {
+      min-height: 80px;
+    }
+    .form-group .checkbox-wrapper {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>Painel do Cardapio | Pizzaria Tres Coracoes</h1>
+    <div class="actions">
+      <button id="logoutBtn" class="btn">Sair</button>
+      <button id="newItemBtn" class="btn btn-primary">Novo Item</button>
+      <button id="saveChangesBtn" class="btn btn-primary">Salvar Alteracoes</button>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <div id="loading">Carregando cardapio...</div>
+    <div id="menuGrid" class="menu-grid"></div>
+  </main>
+
+  <div id="itemModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn">&times;</span>
+      <h2 id="modalTitle">Editar Item</h2>
+      <form id="itemForm">
+        <input type="hidden" id="modalItemId">
+        <div class="form-group">
+          <label for="name">Nome do item</label>
+          <input type="text" id="name" required>
+        </div>
+        <div class="form-group">
+          <label for="desc">Descricao</label>
+          <textarea id="desc"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Tamanhos / Precos das pizzas</label>
+          <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+            <input type="number" id="priceP" step="0.01" placeholder="P | 8 fatias">
+            <input type="number" id="priceM" step="0.01" placeholder="M | 12 fatias">
+            <input type="number" id="priceG" step="0.01" placeholder="G | 16 fatias">
+          </div>
+          <small>Para bebidas, deixe os tamanhos vazios e use o preco unico abaixo.</small>
+        </div>
+        <div class="form-group">
+          <label for="price">Preco unico</label>
+          <input type="number" id="price" step="0.01">
+        </div>
+        <div class="form-group">
+          <label for="cat">Categoria</label>
+          <select id="cat">
+            <option value="tradicionais">Pizzas tradicionais</option>
+            <option value="bebidas">Bebidas</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="img">Imagem</label>
+          <input type="file" id="img" accept="image/*">
+          <small>Envie uma nova imagem para altera-la.</small>
+          <img id="img-preview" src="" style="max-width: 100px; margin-top: 10px; border-radius: 4px; display: none;">
+        </div>
+        <div class="form-group">
+          <div class="checkbox-wrapper">
+            <input type="checkbox" id="active">
+            <label for="active">Ativo no cardapio?</label>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Salvar</button>
+      </form>
+    </div>
+  </div>
+
+  <div id="pwa-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.6); z-index: 1999;"></div>
+  <div id="pwa-install-popup" style="display: none;">
+    <style>
+      #pwa-install-popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 90%;
+        max-width: 380px;
+        background-color: white;
+        color: #333;
+        padding: 2rem;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.25);
+        z-index: 2000;
+        text-align: center;
+        animation: fade-in 0.3s ease-out;
+      }
+      @keyframes fade-in {
+        from { transform: translate(-50%, -40%); opacity: 0; }
+        to { transform: translate(-50%, -50%); opacity: 1; }
+      }
+      #pwa-install-popup h3 {
+        margin: 0 0 0.5rem;
+        font-size: 1.5rem;
+        color: var(--primary-color);
+      }
+      #pwa-install-popup p {
+        margin: 0 0 1.5rem;
+        font-size: 1.1rem;
+        line-height: 1.5;
+      }
+      .pwa-buttons {
+        display: flex;
+        gap: 1rem;
+      }
+      .pwa-buttons button {
+        flex: 1;
+        padding: 0.8rem;
+        border: none;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 1rem;
+        cursor: pointer;
+      }
+      #pwa-install-btn {
+        background-color: var(--primary-color);
+        color: white;
+      }
+      #pwa-later-btn {
+        background-color: var(--gray);
+        color: var(--dark-gray);
+      }
+    </style>
+    <h3>Instalar Painel Admin</h3>
+    <p>Instale o painel de administracao em seu dispositivo para acesso rapido e facil.</p>
+    <div class="pwa-buttons">
+      <button id="pwa-later-btn">Depois</button>
+      <button id="pwa-install-btn">Instalar</button>
+    </div>
+  </div>
+
+  <script src="panel.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/admin/sw.js').then(registration => {
+          console.log('Admin ServiceWorker registration successful with scope: ', registration.scope);
+        }, err => {
+          console.log('Admin ServiceWorker registration failed: ', err);
+        });
+      });
+    }
+  </script>
+</body>
+</html>

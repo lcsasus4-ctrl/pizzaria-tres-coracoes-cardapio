@@ -1,0 +1,13 @@
+{
+  "name": "Admin Três Corações Cardápio",
+  "short_name": "Admin Três Corações",
+  "start_url": "/admin/panel.html",
+  "display": "standalone",
+  "icons": [
+    {
+      "src": "/assets/img/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
