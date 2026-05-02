@@ -8,15 +8,19 @@ const CONFIG = {
 };
 const CATS = [{id:'tradicionais',name:'Pizzas tradicionais'},{id:'bebidas',name:'Bebidas'}];
 let MENU = [];
-const LS = { favs: 'trescoracoes_favs_v1', cart: 'trescoracoes_cart_v1', notes: 'trescoracoes_notes_v1' };
+const LS = { favs: 'trescoracoes_favs_v1', cart: 'trescoracoes_cart_v1', notes: 'trescoracoes_notes_v1', lastOrder: 'trescoracoes_last_order_v1', installPromptHidden: 'trescoracoes_install_prompt_hidden_v1' };
 const els = {
   chips: document.getElementById('chips'), grid: document.getElementById('menuGrid'), empty: document.getElementById('emptyState'),
   searchTrigger: document.getElementById('toggleSearchBtn'), searchBar: document.getElementById('searchBar'), searchInput: document.getElementById('searchInput'), searchClose: document.getElementById('closeSearchBtn'),
   favTrigger: document.getElementById('toggleFavsBtn'), openCart: document.getElementById('openCartBtn'), closeCart: document.getElementById('closeCartBtn'), overlay: document.getElementById('overlay'), drawer: document.getElementById('drawer'),
   cartCount: document.getElementById('cartCount'), drawerSub: document.getElementById('drawerSub'), cartList: document.getElementById('cartList'), subtotal: document.getElementById('subtotal'), total: document.getElementById('total'),
-  checkout: document.getElementById('checkoutBtn'), clearCart: document.getElementById('clearCartBtn'), obs: document.getElementById('obsInput'), openStatus: document.getElementById('openStatus'), year: document.getElementById('year')
+  checkout: document.getElementById('checkoutBtn'), clearCart: document.getElementById('clearCartBtn'), obs: document.getElementById('obsInput'), openStatus: document.getElementById('openStatus'), year: document.getElementById('year'),
+  lastOrderSection: document.getElementById('lastOrderSection'), lastOrderMeta: document.getElementById('lastOrderMeta'), lastOrderItems: document.getElementById('lastOrderItems'), lastOrderTotal: document.getElementById('lastOrderTotal'),
+  repeatLastOrderBtn: document.getElementById('repeatLastOrderBtn'), clearLastOrderBtn: document.getElementById('clearLastOrderBtn'),
+  pwaPopup: document.getElementById('pwa-install-popup'), pwaOverlay: document.getElementById('pwa-overlay'), pwaInstallBtn: document.getElementById('pwa-install-btn'), pwaLaterBtn: document.getElementById('pwa-later-btn')
 };
-const state = { cat: 'all', query: '', favs: new Set(JSON.parse(localStorage.getItem(LS.favs) || '[]')), cart: JSON.parse(localStorage.getItem(LS.cart) || '{}'), notes: JSON.parse(localStorage.getItem(LS.notes) || '{}') };
+const state = { cat: 'all', query: '', favs: new Set(JSON.parse(localStorage.getItem(LS.favs) || '[]')), cart: JSON.parse(localStorage.getItem(LS.cart) || '{}'), notes: JSON.parse(localStorage.getItem(LS.notes) || '{}'), lastOrder: JSON.parse(localStorage.getItem(LS.lastOrder) || 'null') };
+let deferredInstallPrompt = null;
 
 async function loadMenu(){
   try {
@@ -33,6 +37,12 @@ function save(){
   localStorage.setItem(LS.favs, JSON.stringify([...state.favs]));
   localStorage.setItem(LS.cart, JSON.stringify(state.cart));
   localStorage.setItem(LS.notes, JSON.stringify(state.notes));
+}
+function saveLastOrder(order){
+  state.lastOrder = order;
+  if (order) localStorage.setItem(LS.lastOrder, JSON.stringify(order));
+  else localStorage.removeItem(LS.lastOrder);
+  renderLastOrder();
 }
 function priceLabel(item){
   if (item.sizes) return `A partir de ${BRL.format(item.sizes.P || item.sizes.M || item.sizes.G || Object.values(item.sizes)[0])}`;
@@ -103,8 +113,95 @@ function updateCartUI(){
 }
 function getOpenState(){ const now=new Date(); const day=now.getDay(); const mins=now.getHours()*60+now.getMinutes(); const today=CONFIG.hours[day]; if(!today) return {open:false,text:'🔴 Pedidos somente no horário de funcionamento'}; const [oh,om]=today.open.split(':').map(Number); const [ch,cm]=today.close.split(':').map(Number); const start=oh*60+om,end=ch*60+cm; if(mins>=start&&mins<end) return {open:true,text:`🟢 Aberto agora • Fecha às ${today.close}`}; if(mins<start) return {open:false,text:`🔴 Pedidos somente no horário de funcionamento • Abre às ${today.open}`}; return {open:false,text:'🔴 Pedidos somente no horário de funcionamento'}; }
 function checkOpenStatus(){ els.openStatus.textContent=getOpenState().text; }
-function sendWA(){ const openState=getOpenState(); if(!openState.open) return alert('Pedidos só no horário de funcionamento: 15:00 às 22:00.'); const entries=Object.entries(state.cart).map(([key,q])=>{ const {id,size}=parseCartKey(key); const i=MENU.find(x=>x.id===id); return i?{key,i,q,size,unit:getUnitPrice(i,size)}:null; }).filter(Boolean); if(!entries.length) return alert('Sua sacola está vazia.'); let text=`*${CONFIG.businessName}*\n${CONFIG.waHeader}\n\n`; let total=0; entries.forEach(({key,i,q,size,unit})=>{ const sub=unit*q; total+=sub; const slices=size==='P'?'8 fatias':size==='M'?'12 fatias':size==='G'?'16 fatias':''; text+=`▪ ${q}x ${i.name}${size==='unit'?'':` (${size}${slices?` - ${slices}`:''})`}\n   ${BRL.format(sub)}`; if(state.notes[key]?.trim()) text+=`\n   _(Obs: ${state.notes[key]})_`; text+='\n'; }); if(els.obs.value.trim()) text+=`\n📝 *Obs Geral:* ${els.obs.value.trim()}\n`; text+=`\n*TOTAL: ${BRL.format(total)}*`; window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(text)}`,'_blank'); }
+function buildCurrentOrder(entries, total){
+  return {
+    createdAt: new Date().toISOString(),
+    total,
+    generalNote: els.obs.value.trim(),
+    items: entries.map(({key,i,q,size,unit}) => ({
+      id: i.id,
+      name: i.name,
+      qty: q,
+      size,
+      unit,
+      note: state.notes[key] || ''
+    }))
+  };
+}
+function formatOrderDate(iso){
+  const date = new Date(iso);
+  return date.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+}
+function renderLastOrder(){
+  const order = state.lastOrder;
+  if (!order || !Array.isArray(order.items) || !order.items.length) {
+    els.lastOrderSection.hidden = true;
+    return;
+  }
+  els.lastOrderSection.hidden = false;
+  els.lastOrderMeta.textContent = `${order.items.length} item(ns) • ${formatOrderDate(order.createdAt)}`;
+  els.lastOrderTotal.textContent = BRL.format(order.total || 0);
+  els.lastOrderItems.innerHTML = '';
+  order.items.forEach(item => {
+    const slices = item.size === 'P' ? '8 fatias' : item.size === 'M' ? '12 fatias' : item.size === 'G' ? '16 fatias' : '';
+    const label = item.size === 'unit' ? 'Preco unico' : `${item.size} • ${slices}`;
+    const div = document.createElement('div');
+    div.className = 'last-order__item';
+    div.innerHTML = `<div><strong>${item.qty}x ${item.name}</strong><span>${label}</span>${item.note ? `<small>Obs: ${item.note}</small>` : ''}</div><b>${BRL.format((item.unit || 0) * (item.qty || 0))}</b>`;
+    els.lastOrderItems.appendChild(div);
+  });
+}
+function restoreLastOrder(){
+  const order = state.lastOrder;
+  if (!order || !Array.isArray(order.items) || !order.items.length) return;
+  state.cart = {};
+  state.notes = {};
+  order.items.forEach(item => {
+    const key = cartKey(item.id, item.size || 'unit');
+    state.cart[key] = item.qty;
+    if (item.note) state.notes[key] = item.note;
+  });
+  els.obs.value = order.generalNote || '';
+  save();
+  updateCartUI();
+  openDrawer();
+}
+function clearLastOrder(){
+  saveLastOrder(null);
+}
+function sendWA(){ const openState=getOpenState(); if(!openState.open) return alert('Pedidos só no horário de funcionamento: 15:00 às 22:00.'); const entries=Object.entries(state.cart).map(([key,q])=>{ const {id,size}=parseCartKey(key); const i=MENU.find(x=>x.id===id); return i?{key,i,q,size,unit:getUnitPrice(i,size)}:null; }).filter(Boolean); if(!entries.length) return alert('Sua sacola está vazia.'); let text=`*${CONFIG.businessName}*\n${CONFIG.waHeader}\n\n`; let total=0; entries.forEach(({key,i,q,size,unit})=>{ const sub=unit*q; total+=sub; const slices=size==='P'?'8 fatias':size==='M'?'12 fatias':size==='G'?'16 fatias':''; text+=`▪ ${q}x ${i.name}${size==='unit'?'':` (${size}${slices?` - ${slices}`:''})`}\n   ${BRL.format(sub)}`; if(state.notes[key]?.trim()) text+=`\n   _(Obs: ${state.notes[key]})_`; text+='\n'; }); if(els.obs.value.trim()) text+=`\n📝 *Obs Geral:* ${els.obs.value.trim()}\n`; text+=`\n*TOTAL: ${BRL.format(total)}*`; saveLastOrder(buildCurrentOrder(entries, total)); window.open(`https://wa.me/${CONFIG.whatsapp}?text=${encodeURIComponent(text)}`,'_blank'); }
 function openDrawer(){ els.drawer.classList.add('is-open'); els.overlay.hidden=false; }
 function closeDrawer(){ els.drawer.classList.remove('is-open'); setTimeout(()=>els.overlay.hidden=true,300); }
-async function init(){ if(els.year) els.year.textContent=new Date().getFullYear(); await loadMenu(); buildChips(); render(); updateCartUI(); checkOpenStatus(); setInterval(checkOpenStatus,60000); els.openCart.onclick=openDrawer; els.closeCart.onclick=closeDrawer; els.overlay.onclick=closeDrawer; els.checkout.onclick=sendWA; els.clearCart.onclick=()=>{ if(confirm('Esvaziar sacola?')){ state.cart={}; state.notes={}; save(); updateCartUI(); } }; els.searchTrigger.onclick=()=>toggleSearch(true); els.searchClose.onclick=()=>toggleSearch(false); els.favTrigger.onclick=toggleFavsMode; els.searchInput.oninput=(e)=>{ state.query=e.target.value; render();}; }
+function showInstallPrompt(){
+  if (!deferredInstallPrompt || localStorage.getItem(LS.installPromptHidden) === 'true') return;
+  els.pwaOverlay.style.display = 'block';
+  els.pwaPopup.style.display = 'block';
+}
+function hideInstallPrompt(remember){
+  els.pwaOverlay.style.display = 'none';
+  els.pwaPopup.style.display = 'none';
+  if (remember) localStorage.setItem(LS.installPromptHidden, 'true');
+}
+function setupInstallPrompt(){
+  window.addEventListener('beforeinstallprompt', (event) => {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+    localStorage.removeItem(LS.installPromptHidden);
+    showInstallPrompt();
+  });
+  window.addEventListener('appinstalled', () => {
+    deferredInstallPrompt = null;
+    hideInstallPrompt(true);
+  });
+  els.pwaLaterBtn.onclick = () => hideInstallPrompt(true);
+  els.pwaOverlay.onclick = () => hideInstallPrompt(true);
+  els.pwaInstallBtn.onclick = async () => {
+    if (!deferredInstallPrompt) return;
+    deferredInstallPrompt.prompt();
+    await deferredInstallPrompt.userChoice;
+    deferredInstallPrompt = null;
+    hideInstallPrompt(true);
+  };
+}
+async function init(){ if(els.year) els.year.textContent=new Date().getFullYear(); await loadMenu(); buildChips(); render(); updateCartUI(); renderLastOrder(); checkOpenStatus(); setInterval(checkOpenStatus,60000); els.openCart.onclick=openDrawer; els.closeCart.onclick=closeDrawer; els.overlay.onclick=closeDrawer; els.checkout.onclick=sendWA; els.clearCart.onclick=()=>{ if(confirm('Esvaziar sacola?')){ state.cart={}; state.notes={}; save(); updateCartUI(); } }; els.repeatLastOrderBtn.onclick=restoreLastOrder; els.clearLastOrderBtn.onclick=clearLastOrder; els.searchTrigger.onclick=()=>toggleSearch(true); els.searchClose.onclick=()=>toggleSearch(false); els.favTrigger.onclick=toggleFavsMode; els.searchInput.oninput=(e)=>{ state.query=e.target.value; render();}; setupInstallPrompt(); }
 init();

@@ -3,4 +3,5 @@ tools/
 gh_*.zip
 gh-auth*.txt
 .netlify/
+.netlify-appdata/
 .vscode/

@@ -1,4 +1,4 @@
-const CACHE = 'ohana-pwa-v3';
+const CACHE = 'tres-coracoes-pwa-v4';
 
 const ASSETS = [
   './',
@@ -6,6 +6,8 @@ const ASSETS = [
   './styles.css',
   './app.js',
   './manifest.json',
+  './favicon.ico',
+  './assets/img/logo-tres-coracoes.png',
   './assets/img/icon-192.png',
   './assets/img/icon-512.png',
   './assets/img/hero-ohana.png'

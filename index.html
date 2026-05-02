@@ -16,7 +16,7 @@
   <header class="topbar" id="topbar">
     <div class="brand">
       <div class="brand__logo-wrapper">
-        <img class="brand__logo" src="assets/img/logo-tres-coracoes.png" alt="Ohana" onerror="this.style.display='none'" />
+        <img class="brand__logo" src="assets/img/logo-tres-coracoes.png" alt="Logo da Pizzaria Tres Coracoes" onerror="this.style.display='none'" />
       </div>
       <div class="brand__text">
         <div class="brand__name">Pizzaria Três Corações</div>
@@ -29,7 +29,7 @@
     <!-- Hero Section -->
     <section class="hero-immersive">
       <div class="hero__bg">
-        <img src="assets/img/hero-tres-coracoes.jpg" alt="Destaque Ohana" loading="lazy" />
+        <img src="assets/img/hero-tres-coracoes.jpg" alt="Destaque da Pizzaria Tres Coracoes" loading="lazy" />
       </div>
       
       <div class="hero__content-overlay">
@@ -43,6 +43,33 @@
         <div class="hero__address-box">
           <div class="hero__address">Pizzaria Três Corações<br>Delivery via WhatsApp • (81) 98220-6003</div>
           <div class="hero__hours">Todos os dias • 15:00 às 22:00</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="last-order" id="lastOrderSection" hidden>
+      <div class="last-order__header">
+        <div>
+          <p class="last-order__eyebrow">Salvo no seu aparelho</p>
+          <h2 class="last-order__title">Ultimo pedido</h2>
+        </div>
+        <button class="last-order__clear" id="clearLastOrderBtn" type="button">Limpar</button>
+      </div>
+      <div class="last-order__card">
+        <div class="last-order__brand">
+          <img class="last-order__logo" src="assets/img/logo-tres-coracoes.png" alt="Logo da Pizzaria Tres Coracoes" />
+          <div>
+            <div class="last-order__name">Pizzaria Tres Coracoes</div>
+            <div class="last-order__meta" id="lastOrderMeta"></div>
+          </div>
+        </div>
+        <div class="last-order__items" id="lastOrderItems"></div>
+        <div class="last-order__footer">
+          <div>
+            <span class="last-order__label">Total do ultimo pedido</span>
+            <strong class="last-order__total" id="lastOrderTotal">R$ 0,00</strong>
+          </div>
+          <button class="btn btn--gold last-order__repeat" id="repeatLastOrderBtn" type="button">Refazer pedido</button>
         </div>
       </div>
     </section>
